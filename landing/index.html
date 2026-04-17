@@ -4,6 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Oats — Action items from your Granola meetings</title>
+<meta name="description" content="A floating macOS panel that reads your Granola meeting notes and extracts every action item and follow-up — automatically, before you've even closed the tab.">
+<meta name="theme-color" content="#F4EFE4">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oats.dimitritrembois.com">
+<meta property="og:title" content="Oats — Action items from your Granola meetings">
+<meta property="og:description" content="A floating macOS panel that reads your Granola meeting notes and extracts every action item and follow-up — automatically, before you've even closed the tab.">
+<meta property="og:image" content="https://oats.dimitritrembois.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Oats — Action items from your Granola meetings">
+<meta name="twitter:description" content="A floating macOS panel that reads your Granola meeting notes and extracts every action item and follow-up — automatically, before you've even closed the tab.">
+<meta name="twitter:image" content="https://oats.dimitritrembois.com/og-image.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -198,7 +219,7 @@ nav .inner {
 .nsep { height: 1px; background: var(--divider); margin: 8px 0; }
 
 /* ── Features ────────────────────────────────────────────────── */
-.features { padding: 100px 0; }
+.features { padding-top: 100px; padding-bottom: 100px; }
 .section-tag {
   font-size: 12.5px; font-weight: 650; color: var(--green);
   letter-spacing: .8px; text-transform: uppercase; margin-bottom: 14px;
@@ -263,7 +284,7 @@ nav .inner {
 
 /* ── CLI section ─────────────────────────────────────────────── */
 .cli-section {
-  padding: 100px 0;
+  padding-top: 100px; padding-bottom: 100px;
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 80px; align-items: center;
 }
@@ -296,7 +317,7 @@ nav .inner {
 .term-sep { height: 1px; background: #2a2a28; margin: 10px 0; }
 
 /* ── How it works ────────────────────────────────────────────── */
-.how { padding: 100px 0; }
+.how { padding-top: 100px; padding-bottom: 100px; }
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 56px; }
 .step {
   background: var(--cream); border-radius: 18px; padding: 34px 30px 32px;
@@ -309,12 +330,50 @@ nav .inner {
 .step p { font-size: 14px; color: var(--text-2); line-height: 1.65; }
 
 /* ── CTA ─────────────────────────────────────────────────────── */
-.cta-wrap { padding: 100px 0 100px; }
+.cta-wrap { padding-top: 100px; padding-bottom: 100px; }
 .cta { background: var(--green); border-radius: 24px; padding: 80px 60px; text-align: center; color: #fff; }
 .cta h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -.04em; line-height: 1.1; margin-bottom: 16px; }
 .cta p { font-size: 16px; opacity: .72; margin-bottom: 40px; }
 .btn-cta { display: inline-block; background: #fff; color: var(--green); font-size: 15.5px; font-weight: 650; padding: 13px 32px; border-radius: 11px; transition: opacity .15s, transform .1s; }
 .btn-cta:hover { opacity: .92; transform: translateY(-1px); }
+
+/* Install note under hero buttons */
+.install-note {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 16px; font-size: 12px; color: var(--text-2);
+}
+.install-note a { color: var(--green); text-decoration: underline; text-underline-offset: 2px; }
+
+/* Install guide section */
+.install-guide {
+  background: var(--cream); border-radius: 20px;
+  padding: 48px 52px; margin: 0 auto;
+  border: 1px solid var(--divider);
+  max-width: 720px;
+}
+.install-guide h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 22px; font-weight: 700; letter-spacing: -.02em;
+  margin-bottom: 8px;
+}
+.install-guide > p { font-size: 14.5px; color: var(--text-2); margin-bottom: 28px; line-height: 1.6; }
+.install-steps { display: flex; flex-direction: column; gap: 14px; }
+.install-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--page-bg); border-radius: 12px; padding: 14px 18px;
+}
+.install-step-num {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--green);
+  color: #fff; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.install-step p { font-size: 14px; color: var(--text); line-height: 1.55; margin: 0; }
+.install-step p strong { font-weight: 600; }
+.install-step code {
+  background: var(--cream); padding: 2px 7px; border-radius: 5px;
+  font-family: 'SF Mono','Menlo',monospace; font-size: 12px;
+  border: 1px solid var(--divider);
+}
 
 /* ── Footer ──────────────────────────────────────────────────── */
 footer { background: var(--text); color: var(--cream); padding-top: 72px; overflow: hidden; }
@@ -332,17 +391,56 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; gap: 56px; padding: 80px 0 64px; }
+  .wrap { padding: 0 24px; }
+  nav .inner { padding: 0 24px; }
+
+  .hero { grid-template-columns: 1fr; gap: 52px; padding: 80px 0 64px; }
+  .hero-text { text-align: center; }
+  .hero-text p { max-width: 480px; margin-left: auto; margin-right: auto; }
+  .hero-actions { justify-content: center; }
+
+  .hero-visual { align-items: center; }
+  .panel { width: 320px; transform: none; transform-origin: unset; }
+  .granola-note { margin-top: 16px; }
+
   .notes-panel { display: none; }
-  .cli-section { grid-template-columns: 1fr; gap: 56px; }
+  .cli-section { grid-template-columns: 1fr; gap: 48px; }
   .feature-grid { grid-template-columns: 1fr 1fr; }
   .steps { grid-template-columns: 1fr; }
   .footer-top { flex-direction: column; gap: 48px; }
+  .features { padding-top: 80px; padding-bottom: 80px; }
+  .how { padding-top: 80px; padding-bottom: 80px; }
 }
+
 @media (max-width: 560px) {
-  .feature-grid { grid-template-columns: 1fr; }
-  .cta { padding: 56px 28px; }
-  .hero-text h1 { font-size: clamp(38px, 10vw, 56px); }
+  .wrap { padding: 0 28px; }
+  nav .inner { padding: 0 28px; height: 60px; }
+  .nav-logo span { font-size: 20px; }
+
+  .hero { padding: 60px 0 52px; gap: 44px; }
+  .hero-text h1 { font-size: clamp(38px, 10.5vw, 52px); }
+  .hero-text p { font-size: 16px; }
+  .panel { width: 100%; max-width: 300px; }
+
+  .feature-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .feature-card { padding: 22px 18px 20px; }
+  .feature-card h3 { font-size: 14px; }
+  .feature-card p { font-size: 12.5px; }
+  .feature-icon { width: 46px; height: 46px; border-radius: 12px; margin-bottom: 16px; }
+  .feature-icon svg { width: 20px; height: 20px; }
+  .features { padding-top: 72px; padding-bottom: 72px; }
+  .section-h2 { font-size: clamp(28px, 7.5vw, 38px); margin-bottom: 32px; }
+
+  .cli-section { padding-top: 72px; padding-bottom: 72px; gap: 40px; }
+  .terminal { font-size: 11px; }
+
+  .cta-wrap { padding-top: 72px; padding-bottom: 72px; }
+  .cta { padding: 52px 32px; }
+  .cta h2 { font-size: clamp(26px, 7vw, 38px); }
+  .cta p { font-size: 15px; margin-bottom: 32px; }
+
+  .footer-wordmark { font-size: clamp(80px, 22vw, 160px); }
+  footer { padding-top: 56px; }
 }
 </style>
 </head>
@@ -363,7 +461,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
 <section class="hero wrap">
   <div class="hero-text">
     <h1>Your meetings<br>create work.<br><em>Oats gets it<br>done.</em></h1>
-    <p>A floating macOS panel that reads your Granola meeting notes and extracts every action item and follow-up — automatically, before you've even closed the tab.</p>
+    <p>Every meeting ends with things you said you'd do. Oats pulls them out of your Granola notes and puts them right in front of you before you forget.</p>
     <div class="hero-actions">
       <a href="https://github.com/dtventures/oats/releases/latest/download/Oats.dmg" class="btn-primary">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
@@ -448,7 +546,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
 <!-- ── Features ──────────────────────────────────────────────── -->
 <section class="features wrap" id="features">
   <div class="section-tag">Features</div>
-  <h2 class="section-h2">Everything from your meeting.<br>Nothing you didn't ask for.</h2>
+  <h2 class="section-h2">Everything you said you'd do.<br>Nothing lost in the notes.</h2>
 
   <div class="feature-grid">
 
@@ -457,7 +555,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
         <svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11L10 22l9.5-12H13L13 2z" style="fill:#fff;stroke:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))"/></svg>
       </div>
       <h3>Always up to date</h3>
-      <p>Syncs with Granola every 30 seconds. Action items and follow-ups appear in the panel the moment your meeting ends.</p>
+      <p>Meeting ends, tasks appear. Oats checks your Granola notes every 30 seconds so nothing sits buried while you're still on the call.</p>
     </div>
 
     <div class="feature-card">
@@ -465,7 +563,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
         <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" style="fill:#fff;stroke:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))"/></svg>
       </div>
       <h3>Sorted by Claude</h3>
-      <p>Claude reads your notes and separates tasks you need to complete from follow-ups you need to send — automatically.</p>
+      <p>AI figures out what you need to do yourself vs. what you need to send to someone else. To-dos and follow-ups, already split out for you.</p>
     </div>
 
     <div class="feature-card">
@@ -473,7 +571,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" style="fill:rgba(255,255,255,.28);stroke:none"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
       <h3>Notes always there</h3>
-      <p>Every item links to its source. Click the notes icon on any task to read the full meeting summary right alongside your list.</p>
+      <p>Can't remember why something's on your list? Hit the notes button and the full meeting context opens right next to it — no digging through Granola.</p>
     </div>
 
     <div class="feature-card">
@@ -481,7 +579,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
         <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2.5" style="fill:rgba(255,255,255,.28);stroke:none"/><path d="M2 8l10 6 10-6" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
       <h3>Emails in seconds</h3>
-      <p>Draft follow-up emails in a click. Oats pre-fills the recipient, subject, and a personal greeting drawn from the meeting context.</p>
+      <p>One click opens a draft with the right person already in the To field, a subject line, and your name signed at the bottom. Just write the actual message.</p>
     </div>
 
     <div class="feature-card">
@@ -489,7 +587,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
         <svg viewBox="0 0 24 24"><rect x="1" y="7" width="22" height="10" rx="2.5" style="fill:rgba(255,255,255,.2);stroke:none"/><path d="M7 12H4m0 0l2-2m-2 2l2 2M17 12h3m0 0l-2-2m2 2l-2 2M12 8v8" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
       <h3>Pure keyboard flow</h3>
-      <p>Navigate with arrow keys, complete with ↵, open Granola with G. Run the whole workflow without touching your mouse.</p>
+      <p>Arrow keys to move, enter to check off, G to jump to Granola. Most people clear their whole post-meeting list without touching the mouse.</p>
     </div>
 
     <div class="feature-card">
@@ -497,7 +595,7 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
         <svg viewBox="0 0 24 24"><rect x="1" y="3" width="22" height="18" rx="3.5" style="fill:rgba(255,255,255,.2);stroke:none"/><path d="M6 9l4 3-4 3M13 15h5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
       <h3>Claude Code ready</h3>
-      <p>Press C on any task and Oats passes it to Claude Code with the full meeting notes as context — ready to start working immediately.</p>
+      <p>Got a technical task from a meeting? Press C and Claude Code gets the task plus the full meeting context handed off automatically — just start building.</p>
     </div>
 
   </div>
@@ -558,9 +656,35 @@ footer { background: var(--text); color: var(--cream); padding-top: 72px; overfl
 <!-- ── CTA ───────────────────────────────────────────────────── -->
 <div class="cta-wrap wrap" id="download">
   <div class="cta">
-    <h2>Stop letting meetings<br>create backlogs.</h2>
+    <h2>Stop losing track of<br>what you said you'd do.</h2>
     <p>Free to try. Requires Granola and a Granola API key.</p>
     <a href="https://github.com/dtventures/oats/releases/latest/download/Oats.dmg" class="btn-cta">Download Oats for Mac →</a>
+  </div>
+</div>
+
+<!-- ── Install guide ─────────────────────────────────────────── -->
+<div class="cta-wrap wrap" id="install" style="padding-top: 0;">
+  <div class="install-guide">
+    <h3>First launch on macOS</h3>
+    <p>Oats isn't on the Mac App Store, so macOS will block it the first time. Here's how to open it.</p>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="install-step-num">1</div>
+        <p>Drag <strong>Oats</strong> to your Applications folder and double-click to open.</p>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">2</div>
+        <p>Go to <strong>System Settings › Privacy & Security</strong> and click <strong>Open Anyway</strong>.</p>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">3</div>
+        <p>Confirm once more when prompted. Done. This only happens on the first launch.</p>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num" style="background: var(--text-2);">?</div>
+        <p><strong>Still blocked?</strong> Run this in Terminal: <code>xattr -cr /Applications/Oats.app</code></p>
+      </div>
+    </div>
   </div>
 </div>
 

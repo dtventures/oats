@@ -13,6 +13,21 @@
 - Floating NSPanel pinned top-right, single Space, cream UI
 - Mock data with 6 meeting types for testing
 
+## 2026-04-16 / 2026-04-17
+
+### Session 4
+- GitHub repo created at github.com/dtventures/oats (public)
+- DMG built (ad-hoc signed) and uploaded as v1.0 release
+- README with screenshot, features table, keyboard shortcuts, CLI docs, build instructions
+- Landing page deployed to oats.dimitritrembois.com via Vercel
+- Custom domain DNS added via Cloudflare (A record → 76.76.21.21)
+- OG/social meta tags added: og:image (1200×630 branded), Twitter card, favicon
+- Landing page hero screenshot replaced with clean panel mockup (no real names)
+- Full mobile responsiveness pass: fixed padding shorthand bug (padding: 100px 0 overriding .wrap horizontal padding), 2-column feature grid on mobile, proper side buffers
+- All landing page copy rewritten with real user language
+- Gatekeeper install guide added (4 steps + xattr fallback)
+- GitHub button with GitHub mark SVG added to hero
+
 ### Session 2
 - Wired ClaudeAPI into ActionItemExtractor.extractAsync() with parallel task group in sync()
 - Multi-step onboarding flow (Welcome → Granola Key → Claude Key → Profile)

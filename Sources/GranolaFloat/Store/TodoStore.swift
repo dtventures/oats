@@ -74,7 +74,6 @@ final class TodoStore: ObservableObject {
 
         do {
             let notes = try await api.fetchRecentNotes(daysBack: daysBack)
-
             // Only skip notes that have already been processed with content.
             // Notes with no summaryMarkdown yet are retried every sync cycle
             // until Granola finishes generating them.
@@ -103,7 +102,11 @@ final class TodoStore: ObservableObject {
             }
 
             await MainActor.run {
-                if !newItems.isEmpty { todos.append(contentsOf: newItems) }
+                if !newItems.isEmpty {
+                    let existingNoteIds = Set(todos.map(\.noteId))
+                    let deduped = newItems.filter { !existingNoteIds.contains($0.noteId) }
+                    if !deduped.isEmpty { todos.append(contentsOf: deduped) }
+                }
                 lastSynced = Date()
                 isSyncing  = false
                 PersistenceManager.save(Array(processedNoteIds),

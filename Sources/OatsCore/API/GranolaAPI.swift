@@ -21,12 +21,15 @@ public struct GranolaAPI {
         let cutoff = Calendar.current.date(byAdding: .day, value: -daysBack, to: Date())!
         let summaries = try await listNotes(createdAfter: cutoff)
 
-        return try await withThrowingTaskGroup(of: GranolaNote?.self) { group in
+        return await withTaskGroup(of: GranolaNote?.self) { group in
             for summary in summaries {
-                group.addTask { try await self.fetchNote(id: summary.id) }
+                group.addTask {
+                    // Individual notes may 404 while Granola is still processing them — skip gracefully
+                    try? await self.fetchNote(id: summary.id)
+                }
             }
             var notes: [GranolaNote] = []
-            for try await note in group {
+            for await note in group {
                 if let note { notes.append(note) }
             }
             return notes

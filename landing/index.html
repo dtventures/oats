@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oats — Action items from your Granola meetings</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+/* ── Tokens ──────────────────────────────────────────────────── */
+:root {
+  --cream:       #ECE7D9;
+  --cream-hover: #E3DCC8;
+  --divider:     #D4CDB8;
+  --badge:       #D9D2BC;
+  --text:        #28261F;
+  --text-2:      #A8A39A;
+  --text-3:      #C8C3B8;
+  --green:       #507A46;
+  --green-light: #EBF2E8;
+  --page-bg:     #F4EFE4;
+  --shadow:      0 12px 48px rgba(40,38,31,.14), 0 2px 8px rgba(40,38,31,.06);
+  --shadow-sm:   0 2px 14px rgba(40,38,31,.08);
+}
+
+/* ── Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--page-bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── Layout ──────────────────────────────────────────────────── */
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+
+/* ── Nav ─────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(244,239,228,.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--divider);
+}
+nav .inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 68px;
+}
+.nav-logo { display: flex; align-items: center; gap: 12px; }
+.nav-logo img { width: 38px; height: 38px; border-radius: 10px; }
+.nav-logo span {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 24px; font-weight: 800; letter-spacing: -.5px;
+}
+.btn-dl {
+  background: var(--green); color: #fff;
+  font-size: 13.5px; font-weight: 600;
+  padding: 8px 18px; border-radius: 9px;
+  transition: opacity .15s, transform .1s;
+}
+.btn-dl:hover { opacity: .88; transform: translateY(-1px); }
+
+/* ── Hero ────────────────────────────────────────────────────── */
+.hero {
+  padding: 160px 0 140px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--green);
+  font-size: 12.5px; font-weight: 600; letter-spacing: .4px;
+  margin-bottom: 28px;
+}
+.hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.hero-text h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(48px, 5.5vw, 72px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -.03em;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+.hero-text h1 em { font-style: normal; color: var(--green); }
+.hero-text p {
+  font-size: 18px; color: var(--text-2);
+  line-height: 1.7; max-width: 420px;
+  margin-bottom: 40px; font-weight: 400;
+}
+.hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--green); color: #fff;
+  font-size: 15px; font-weight: 600;
+  padding: 13px 28px; border-radius: 11px;
+  transition: opacity .15s, transform .1s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.btn-secondary {
+  font-size: 14.5px; font-weight: 500; color: var(--text-2);
+  padding: 13px 4px; transition: color .15s;
+}
+.btn-secondary:hover { color: var(--text); }
+.granola-note {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--cream); border-radius: 8px;
+  padding: 6px 12px; margin-top: 20px;
+  box-shadow: var(--shadow-sm); font-size: 11.5px; color: var(--text-2);
+  border: 1px solid var(--divider);
+}
+.granola-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+/* ── App mockup ──────────────────────────────────────────────── */
+.hero-visual {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  gap: 28px;
+}
+.panel {
+  width: 380px; flex-shrink: 0;
+  background: var(--cream);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transform: scale(1.28);
+  transform-origin: top center;
+}
+.panel-header {
+  height: 44px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px 0 16px;
+}
+.traffic-lights { display: flex; gap: 6px; align-items: center; }
+.tl { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.1); }
+.tl-r { background: #FF5B57; } .tl-y { background: #FFBC2E; } .tl-g { background: #28C840; }
+.header-icons { display: flex; gap: 2px; }
+.hi { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: var(--text-2); }
+.hi.active { background: var(--cream-hover); color: var(--text); }
+.hi svg { width: 13px; height: 13px; }
+.sync-bar { display: flex; align-items: center; gap: 7px; padding: 6px 16px; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.sync-label { font-size: 11px; color: var(--text-2); flex: 1; }
+.sync-btn { font-size: 10px; font-weight: 600; color: var(--green); padding: 2px 7px; border-radius: 4px; background: var(--green-light); }
+.pd { height: 1px; background: var(--divider); margin: 0 12px; }
+.section-lbl { display: flex; align-items: center; gap: 6px; padding: 10px 20px 4px; font-size: 10px; font-weight: 700; color: var(--text-2); letter-spacing: 1.2px; text-transform: uppercase; }
+.sbadge { font-size: 10px; font-weight: 600; color: var(--text-2); padding: 0 6px; border-radius: 20px; background: var(--badge); }
+.mhdr { display: flex; align-items: center; gap: 6px; padding: 8px 20px 2px; }
+.mhdr .mt { font-size: 10.5px; font-weight: 500; color: var(--text-2); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mhdr .ml { font-size: 9px; color: var(--text-2); opacity: .4; }
+.avs { display: flex; }
+.av { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #fff; margin-left: -3px; border: 1.5px solid var(--cream); }
+.av:first-child { margin-left: 0; }
+.trow { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 10px; margin: 0 6px; }
+.trow:hover { background: var(--cream-hover); }
+.chk { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid #B5AFA0; }
+.ttxt { font-size: 12.5px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rbadge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 5px; flex-shrink: 0; }
+.rbadge-ai { color: var(--green); background: var(--green-light); }
+.rbadge-doc { color: var(--text-2); background: var(--badge); }
+.rdiv { height: 1px; background: var(--divider); opacity: .6; margin: 0 48px 0 20px; }
+
+/* Notes side panel */
+.notes-panel {
+  width: 220px; flex-shrink: 0;
+  background: var(--cream);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  margin-left: 8px;
+  align-self: flex-start;
+  overflow: hidden;
+}
+.nhdr { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid var(--divider); }
+.nhdr .ntitle { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nhdr .nx { width: 19px; height: 19px; border-radius: 5px; background: var(--cream-hover); display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--text-2); }
+.nbody { padding: 12px 14px; }
+.nh2 { font-size: 11px; font-weight: 650; color: var(--text); margin-bottom: 5px; }
+.ni { font-size: 10.5px; color: var(--text-2); line-height: 1.55; padding-left: 10px; position: relative; margin-bottom: 3px; }
+.ni::before { content: '·'; position: absolute; left: 0; color: var(--text-3); }
+.nsep { height: 1px; background: var(--divider); margin: 8px 0; }
+
+/* ── Features ────────────────────────────────────────────────── */
+.features { padding: 100px 0; }
+.section-tag {
+  font-size: 12.5px; font-weight: 650; color: var(--green);
+  letter-spacing: .8px; text-transform: uppercase; margin-bottom: 14px;
+}
+.section-h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(30px, 3.5vw, 44px);
+  font-weight: 750; letter-spacing: -.035em; line-height: 1.15;
+  margin-bottom: 56px; max-width: 560px;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.feature-card {
+  background: var(--cream);
+  border-radius: 18px;
+  padding: 32px 28px 30px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid transparent;
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .55s cubic-bezier(.22,1,.36,1),
+              transform .55s cubic-bezier(.22,1,.36,1),
+              border-color .2s, box-shadow .2s;
+}
+.feature-card.visible { opacity: 1; transform: translateY(0); }
+.feature-card:hover {
+  border-color: var(--divider);
+  box-shadow: 0 6px 28px rgba(40,38,31,.11);
+  transform: translateY(-3px);
+}
+
+/* 3D icon tiles */
+.feature-icon {
+  width: 58px; height: 58px; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  transform: perspective(180px) rotateX(12deg);
+  transition: transform .25s cubic-bezier(.22,1,.36,1);
+}
+.feature-card:hover .feature-icon {
+  transform: perspective(180px) rotateX(6deg) translateY(-3px);
+}
+.fi-1 { background: #4E7EC4; box-shadow: 0 3px 0 #3566AC, 0 6px 0 #1E4A8A, 0 10px 22px rgba(30,74,138,.32); }
+.fi-2 { background: #8B5CF6; box-shadow: 0 3px 0 #7340E0, 0 6px 0 #552AC8, 0 10px 22px rgba(85,42,200,.32); }
+.fi-3 { background: #E07B3A; box-shadow: 0 3px 0 #C46020, 0 6px 0 #A04810, 0 10px 22px rgba(160,72,16,.32); }
+.fi-4 { background: #2FA86E; box-shadow: 0 3px 0 #188C54, 0 6px 0 #0A6E3C, 0 10px 22px rgba(10,110,60,.32); }
+.fi-5 { background: #D45D7A; box-shadow: 0 3px 0 #B84060, 0 6px 0 #942846, 0 10px 22px rgba(148,40,70,.32); }
+.fi-6 { background: #2B8FA8; box-shadow: 0 3px 0 #1A748E, 0 6px 0 #0C5A72, 0 10px 22px rgba(12,90,114,.32); }
+.feature-icon svg {
+  width: 26px; height: 26px;
+  stroke: #fff; fill: none;
+  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.25));
+}
+.feature-card h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 17px; font-weight: 700; margin-bottom: 10px; letter-spacing: -.02em;
+}
+.feature-card p { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+/* ── CLI section ─────────────────────────────────────────────── */
+.cli-section {
+  padding: 100px 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+}
+.cli-text .section-h2 { margin-bottom: 18px; }
+.cli-text p { font-size: 15.5px; color: var(--text-2); line-height: 1.7; margin-bottom: 14px; }
+.cli-text p:last-of-type { margin-bottom: 0; }
+.code-inline {
+  background: var(--cream); padding: 2px 7px; border-radius: 5px;
+  font-family: 'SF Mono','Menlo',monospace; font-size: 12.5px; color: var(--text);
+  border: 1px solid var(--divider);
+}
+.cli-keys { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+.key-chip {
+  display: flex; align-items: center; gap: 7px; background: var(--cream);
+  border-radius: 9px; padding: 7px 13px; font-size: 12.5px; color: var(--text-2);
+  box-shadow: var(--shadow-sm); border: 1px solid var(--divider);
+}
+.key { font-family: 'SF Mono','Menlo',monospace; font-size: 11px; font-weight: 700; color: var(--green); }
+.terminal {
+  background: #161614; border-radius: 16px; overflow: hidden;
+  box-shadow: var(--shadow); font-family: 'SF Mono','Menlo','Monaco',monospace; font-size: 12px;
+}
+.term-bar { height: 40px; background: #222220; display: flex; align-items: center; padding: 0 16px; gap: 7px; }
+.ttl { width: 12px; height: 12px; border-radius: 50%; }
+.ttl-r{background:#FF5F57;}.ttl-y{background:#FFBD2E;}.ttl-g{background:#28CA41;}
+.term-title { flex: 1; text-align: center; font-size: 11px; color: #555; }
+.term-body { padding: 20px 22px 24px; line-height: 1.75; }
+.t-dim{color:#555;}.t-g{color:#A8C8A0;}.t-b{color:#fff;font-weight:700;}.t-arrow{color:#A8C8A0;}
+.trow-t { display: flex; gap: 8px; align-items: baseline; }
+.term-sep { height: 1px; background: #2a2a28; margin: 10px 0; }
+
+/* ── How it works ────────────────────────────────────────────── */
+.how { padding: 100px 0; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 56px; }
+.step {
+  background: var(--cream); border-radius: 18px; padding: 34px 30px 32px;
+  box-shadow: var(--shadow-sm); opacity: 0; transform: translateY(28px);
+  transition: opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1);
+}
+.step.visible { opacity: 1; transform: translateY(0); }
+.step-num { font-size: 12px; font-weight: 700; color: var(--green); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 16px; }
+.step h3 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 12px; letter-spacing: -.02em; }
+.step p { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+/* ── CTA ─────────────────────────────────────────────────────── */
+.cta-wrap { padding: 100px 0 100px; }
+.cta { background: var(--green); border-radius: 24px; padding: 80px 60px; text-align: center; color: #fff; }
+.cta h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -.04em; line-height: 1.1; margin-bottom: 16px; }
+.cta p { font-size: 16px; opacity: .72; margin-bottom: 40px; }
+.btn-cta { display: inline-block; background: #fff; color: var(--green); font-size: 15.5px; font-weight: 650; padding: 13px 32px; border-radius: 11px; transition: opacity .15s, transform .1s; }
+.btn-cta:hover { opacity: .92; transform: translateY(-1px); }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+footer { background: var(--text); color: var(--cream); padding-top: 72px; overflow: hidden; }
+.footer-top { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 64px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.footer-brand-col { display: flex; flex-direction: column; gap: 16px; }
+.footer-logo { display: flex; align-items: center; gap: 10px; }
+.footer-logo img { width: 32px; height: 32px; border-radius: 8px; }
+.footer-logo span { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 700; color: var(--cream); }
+.footer-desc { font-size: 14px; color: rgba(236,231,217,.45); max-width: 260px; line-height: 1.65; }
+.footer-links-col h4 { font-size: 11.5px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: rgba(236,231,217,.35); margin-bottom: 16px; }
+.footer-links-col a { display: block; font-size: 14px; color: rgba(236,231,217,.6); margin-bottom: 10px; transition: color .15s; }
+.footer-links-col a:hover { color: var(--cream); }
+.footer-wordmark { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(100px, 18vw, 240px); font-weight: 800; letter-spacing: -.04em; line-height: .88; color: transparent; -webkit-text-stroke: 1.5px rgba(236,231,217,.18); user-select: none; padding: 32px 0 0; white-space: nowrap; overflow: hidden; }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 28px; font-size: 12px; color: rgba(236,231,217,.25); border-top: 1px solid rgba(255,255,255,.06); }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 56px; padding: 80px 0 64px; }
+  .notes-panel { display: none; }
+  .cli-section { grid-template-columns: 1fr; gap: 56px; }
+  .feature-grid { grid-template-columns: 1fr 1fr; }
+  .steps { grid-template-columns: 1fr; }
+  .footer-top { flex-direction: column; gap: 48px; }
+}
+@media (max-width: 560px) {
+  .feature-grid { grid-template-columns: 1fr; }
+  .cta { padding: 56px 28px; }
+  .hero-text h1 { font-size: clamp(38px, 10vw, 56px); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Nav ──────────────────────────────────────────────────── -->
+<nav>
+  <div class="inner">
+    <div class="nav-logo">
+      <img src="icon.png" alt="Oats">
+      <span>Oats</span>
+    </div>
+    <a href="#download" class="btn-dl">Download for Mac</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="hero wrap">
+  <div class="hero-text">
+    <h1>Your meetings<br>create work.<br><em>Oats gets it<br>done.</em></h1>
+    <p>A floating macOS panel that reads your Granola meeting notes and extracts every action item and follow-up — automatically, before you've even closed the tab.</p>
+    <div class="hero-actions">
+      <a href="#download" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M5 14l7 7 7-7"/><path d="M3 21h18"/></svg>
+        Download for Mac
+      </a>
+      <a href="#how" class="btn-secondary">How it works →</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <!-- Main panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="traffic-lights">
+          <div class="tl tl-r"></div><div class="tl tl-y"></div><div class="tl tl-g"></div>
+        </div>
+        <div class="header-icons">
+          <div class="hi active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+          </div>
+          <div class="hi">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 3V2M11 3V2"/></svg>
+          </div>
+          <div class="hi">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="sync-bar">
+        <div class="sync-dot"></div>
+        <span class="sync-label">Granola · just now</span>
+        <span class="sync-btn">Sync</span>
+      </div>
+      <div class="pd"></div>
+      <div class="section-lbl">To-Dos <span class="sbadge">3</span></div>
+      <div class="mhdr">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#A8A39A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2" width="13" height="12.5" rx="2"/><path d="M1.5 6.5h13" stroke-width="1.3"/><path d="M5 .5v3M11 .5v3"/><circle cx="5" cy="10" r="1" fill="#A8A39A" stroke="none"/><circle cx="8" cy="10" r="1" fill="#A8A39A" stroke="none"/><circle cx="11" cy="10" r="1" fill="#A8A39A" stroke="none"/></svg>
+        <span class="mt">Design System Review</span>
+        <div class="avs">
+          <div class="av" style="background:#7BA3C4">SL</div>
+          <div class="av" style="background:#C47B9E">MR</div>
+        </div>
+      </div>
+      <div class="trow">
+        <div class="chk"></div>
+        <span class="ttxt">Update component library tokens</span>
+      </div>
+      <div class="rdiv"></div>
+      <div class="trow">
+        <div class="chk"></div>
+        <span class="ttxt">Write API docs for v2 endpoints</span>
+      </div>
+      <div class="rdiv"></div>
+      <div class="trow">
+        <div class="chk"></div>
+        <span class="ttxt">Review PRD with design team</span>
+      </div>
+      <div class="section-lbl" style="padding-top:12px;">Follow-Ups <span class="sbadge">1</span></div>
+      <div class="mhdr">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#A8A39A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2" width="13" height="12.5" rx="2"/><path d="M1.5 6.5h13" stroke-width="1.3"/><path d="M5 .5v3M11 .5v3"/><circle cx="5" cy="10" r="1" fill="#A8A39A" stroke="none"/><circle cx="8" cy="10" r="1" fill="#A8A39A" stroke="none"/><circle cx="11" cy="10" r="1" fill="#A8A39A" stroke="none"/></svg>
+        <span class="mt">Product Sync — Q2</span>
+        <div class="avs"><div class="av" style="background:#7BAF7B">SC</div></div>
+      </div>
+      <div class="trow">
+        <div class="chk"></div>
+        <span class="ttxt">Email Sarah re: pricing timeline</span>
+        <span class="rbadge rbadge-ai">AI</span>
+      </div>
+      <div style="height:8px;"></div>
+    </div>
+
+    <div class="granola-note">
+      <span class="granola-dot"></span>
+      Built for <strong style="color:var(--text)">Granola</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ──────────────────────────────────────────────── -->
+<section class="features wrap" id="features">
+  <div class="section-tag">Features</div>
+  <h2 class="section-h2">Everything from your meeting.<br>Nothing you didn't ask for.</h2>
+
+  <div class="feature-grid">
+
+    <div class="feature-card">
+      <div class="feature-icon fi-1">
+        <svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11L10 22l9.5-12H13L13 2z" style="fill:#fff;stroke:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))"/></svg>
+      </div>
+      <h3>Always up to date</h3>
+      <p>Syncs with Granola every 30 seconds. Action items and follow-ups appear in the panel the moment your meeting ends.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon fi-2">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" style="fill:#fff;stroke:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))"/></svg>
+      </div>
+      <h3>Sorted by Claude</h3>
+      <p>Claude reads your notes and separates tasks you need to complete from follow-ups you need to send — automatically.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon fi-3">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" style="fill:rgba(255,255,255,.28);stroke:none"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+      <h3>Notes always there</h3>
+      <p>Every item links to its source. Click the notes icon on any task to read the full meeting summary right alongside your list.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon fi-4">
+        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2.5" style="fill:rgba(255,255,255,.28);stroke:none"/><path d="M2 8l10 6 10-6" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+      <h3>Emails in seconds</h3>
+      <p>Draft follow-up emails in a click. Oats pre-fills the recipient, subject, and a personal greeting drawn from the meeting context.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon fi-5">
+        <svg viewBox="0 0 24 24"><rect x="1" y="7" width="22" height="10" rx="2.5" style="fill:rgba(255,255,255,.2);stroke:none"/><path d="M7 12H4m0 0l2-2m-2 2l2 2M17 12h3m0 0l-2-2m2 2l-2 2M12 8v8" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+      <h3>Pure keyboard flow</h3>
+      <p>Navigate with arrow keys, complete with ↵, open Granola with G. Run the whole workflow without touching your mouse.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon fi-6">
+        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="22" height="18" rx="3.5" style="fill:rgba(255,255,255,.2);stroke:none"/><path d="M6 9l4 3-4 3M13 15h5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+      <h3>Claude Code ready</h3>
+      <p>Press C on any task and Oats passes it to Claude Code with the full meeting notes as context — ready to start working immediately.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── CLI section ───────────────────────────────────────────── -->
+<section class="cli-section wrap">
+  <div class="cli-text">
+    <div class="section-tag">Terminal</div>
+    <h2 class="section-h2">A full CLI for people who live in the terminal.</h2>
+    <p>Run <span class="code-inline">oats</span> for an interactive TUI with arrow-key navigation, live sync, notes access, and Claude Code handoff — no mouse required.</p>
+    <p>Pipe-friendly <span class="code-inline">oats list</span> and <span class="code-inline">oats sync</span> are available for scripting.</p>
+    <div class="cli-keys">
+      <div class="key-chip"><span class="key">↑↓</span> navigate</div>
+      <div class="key-chip"><span class="key">⏎</span> complete</div>
+      <div class="key-chip"><span class="key">N</span> view notes</div>
+      <div class="key-chip"><span class="key">C</span> Claude Code</div>
+      <div class="key-chip"><span class="key">E</span> email draft</div>
+      <div class="key-chip"><span class="key">G</span> open in Granola</div>
+    </div>
+  </div>
+  <div class="terminal">
+    <div class="term-bar">
+      <div class="ttl ttl-r"></div><div class="ttl ttl-y"></div><div class="ttl ttl-g"></div>
+      <span class="term-title">oats</span>
+    </div>
+    <div class="term-body">
+      <div class="trow-t"><span class="t-b">OATS</span><span class="t-dim">&nbsp;&nbsp;3 to-dos  ·  1 follow-up</span></div>
+      <br>
+      <div class="t-b" style="letter-spacing:.05em">TO-DOS <span class="t-dim" style="font-weight:400">(3)</span></div><br>
+      <div class="t-dim">&nbsp;&nbsp;Design System Review  ·  Today</div>
+      <div class="trow-t" style="margin-top:2px">
+        <span class="t-arrow">▶</span><span class="t-g">&nbsp;●</span>
+        <span class="t-b">&nbsp;&nbsp;Update component library tokens</span><span class="t-dim">&nbsp;&nbsp;·</span>
+      </div>
+      <div class="trow-t">
+        <span class="t-dim">&nbsp;</span><span class="t-dim">&nbsp;○</span>
+        <span class="t-dim">&nbsp;&nbsp;Write API docs for v2 endpoints</span><span class="t-dim">&nbsp;&nbsp;·</span>
+      </div>
+      <div class="trow-t">
+        <span class="t-dim">&nbsp;</span><span class="t-dim">&nbsp;○</span>
+        <span class="t-dim">&nbsp;&nbsp;Review PRD with design team</span>
+      </div>
+      <br>
+      <div class="t-b" style="letter-spacing:.05em">FOLLOW-UPS <span class="t-dim" style="font-weight:400">(1)</span></div><br>
+      <div class="t-dim">&nbsp;&nbsp;Product Sync  ·  Yesterday</div>
+      <div class="trow-t" style="margin-top:2px">
+        <span class="t-dim">&nbsp;</span><span class="t-dim">&nbsp;○</span>
+        <span class="t-dim">&nbsp;&nbsp;Email Sarah re: pricing timeline</span>
+        <span class="t-g" style="font-size:10px">&nbsp;&nbsp;[AI]</span>
+      </div>
+      <div class="term-sep"></div>
+      <div class="t-dim">↑↓ move  ·  ⏎ done  ·  n notes  ·  c claude  ·  q quit</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────── -->
+<div class="cta-wrap wrap" id="download">
+  <div class="cta">
+    <h2>Stop letting meetings<br>create backlogs.</h2>
+    <p>Free to try. Requires Granola and a Granola API key.</p>
+    <a href="#" class="btn-cta">Download Oats for Mac →</a>
+  </div>
+</div>
+
+<!-- ── Footer ───────────────────────────────────────────────── -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand-col">
+        <div class="footer-logo">
+          <img src="icon.png" alt="Oats"><span>Oats</span>
+        </div>
+        <p class="footer-desc">A floating macOS panel that turns Granola meeting notes into actionable to-dos and follow-ups.</p>
+      </div>
+      <div class="footer-links-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#download">Download</a>
+      </div>
+      <div class="footer-links-col">
+        <h4>Requirements</h4>
+        <a href="#">macOS 14+</a>
+        <a href="#">Granola account</a>
+        <a href="#">Granola API key</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap"><div class="footer-wordmark">OATS</div></div>
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2025 Oats. Made for Granola users who ship things.</span>
+      <span>macOS only</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.feature-card').forEach((c, i) => {
+  c.style.transitionDelay = `${(i % 3) * 90}ms`;
+  observer.observe(c);
+});
+document.querySelectorAll('.step').forEach((s, i) => {
+  s.style.transitionDelay = `${i * 90}ms`;
+  observer.observe(s);
+});
+</script>
+</body>
+</html>

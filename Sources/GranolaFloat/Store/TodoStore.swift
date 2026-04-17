@@ -74,17 +74,27 @@ final class TodoStore: ObservableObject {
 
         do {
             let notes = try await api.fetchRecentNotes(daysBack: daysBack)
-            let newNotes = notes.filter { processedNoteIds.insert($0.id).inserted }
+
+            // Only skip notes that have already been processed with content.
+            // Notes with no summaryMarkdown yet are retried every sync cycle
+            // until Granola finishes generating them.
+            let unprocessed = notes.filter { !processedNoteIds.contains($0.id) }
+            let notesWithContent    = unprocessed.filter { $0.summaryMarkdown != nil && !($0.summaryMarkdown!.isEmpty) }
+            let notesWithoutContent = unprocessed.filter { $0.summaryMarkdown == nil || $0.summaryMarkdown!.isEmpty }
+
+            // Mark notes-with-content as processed now (won't re-extract next sync)
+            for note in notesWithContent { processedNoteIds.insert(note.id) }
+            // Notes without content are intentionally left out of processedNoteIds
+            // so they are retried on the next 30-second sync
+            _ = notesWithoutContent
 
             // Persist each note's markdown before extracting items
-            for note in newNotes {
-                if let md = note.summaryMarkdown, !md.isEmpty {
-                    PersistenceManager.saveNote(md, noteId: note.id)
-                }
+            for note in notesWithContent {
+                PersistenceManager.saveNote(note.summaryMarkdown!, noteId: note.id)
             }
 
             let newItems = await withTaskGroup(of: [TodoItem].self) { group in
-                for note in newNotes {
+                for note in notesWithContent {
                     group.addTask { await ActionItemExtractor.extractAsync(from: note) }
                 }
                 var all: [TodoItem] = []

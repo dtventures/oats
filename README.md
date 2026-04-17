@@ -10,7 +10,7 @@
     <img src="https://img.shields.io/badge/Requires-Granola-507A46?style=flat-square" alt="Requires Granola">
   </p>
   <br>
-  <img src="landing/app-screenshot.png" width="340" alt="Oats floating panel" style="border-radius:16px">
+  <img src="landing/panel-mockup.png" width="340" alt="Oats floating panel" style="border-radius:16px">
   <br><br>
 </div>
 

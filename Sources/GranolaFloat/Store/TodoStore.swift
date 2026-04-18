@@ -21,6 +21,7 @@ final class TodoStore: ObservableObject {
     private let api = GranolaAPI()
     private var processedNoteIds: Set<String> = []
     private var saveCancellable: AnyCancellable?
+    private var cacheWatchSource: DispatchSourceFileSystemObject?
 
     // MARK: - Init
 
@@ -32,6 +33,27 @@ final class TodoStore: ObservableObject {
             .sink { [weak self] todos in
                 self?.saveToDisk(todos)
             }
+        startCacheWatcher()
+    }
+
+    // MARK: - Local cache file watcher
+
+    private func startCacheWatcher() {
+        let cachePath = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/Granola/cache-v6.json").path
+        let fd = open(cachePath, O_EVTONLY)
+        guard fd >= 0 else { return }
+        let source = DispatchSource.makeFileSystemObjectSource(
+            fileDescriptor: fd,
+            eventMask: .write,
+            queue: DispatchQueue.global(qos: .utility)
+        )
+        source.setEventHandler { [weak self] in
+            Task { await self?.syncLocal() }
+        }
+        source.setCancelHandler { close(fd) }
+        source.resume()
+        cacheWatchSource = source
     }
 
     // MARK: - Persistence
@@ -63,6 +85,7 @@ final class TodoStore: ObservableObject {
     }
 
     func sync() async {
+        await syncLocal()
         await sync(daysBack: 14)
     }
 
@@ -121,6 +144,50 @@ final class TodoStore: ObservableObject {
                 isSyncing = false
                 syncError = friendlyError(error)
             }
+        }
+    }
+
+    // MARK: - Local cache sync (reads Granola's cache-v6.json directly)
+
+    func syncLocal() async {
+        let notes = LocalGranolaCache.readNotes()
+        let unprocessed = notes.filter { !processedNoteIds.contains($0.id) }
+        guard !unprocessed.isEmpty else { return }
+
+        // Mark as processed immediately so concurrent calls don't double-extract
+        await MainActor.run {
+            for note in unprocessed { processedNoteIds.insert(note.id) }
+        }
+
+        // Save notes markdown to disk
+        for note in unprocessed {
+            if let md = note.summaryMarkdown {
+                PersistenceManager.saveNote(md, noteId: note.id)
+            }
+        }
+
+        let newItems = await withTaskGroup(of: [TodoItem].self) { group in
+            for note in unprocessed {
+                group.addTask { await ActionItemExtractor.extractAsync(from: note) }
+            }
+            var all: [TodoItem] = []
+            for await items in group { all.append(contentsOf: items) }
+            return all
+        }
+
+        await MainActor.run {
+            if !newItems.isEmpty {
+                let existingNoteIds = Set(todos.map(\.noteId))
+                let deduped = newItems.filter { !existingNoteIds.contains($0.noteId) }
+                if !deduped.isEmpty {
+                    todos.append(contentsOf: deduped)
+                    updateBadge()
+                }
+            }
+            PersistenceManager.save(Array(processedNoteIds), to: PersistenceManager.File.processedNotes)
+        }
+        if !newItems.isEmpty {
+            sendNotification(for: newItems)
         }
     }
 

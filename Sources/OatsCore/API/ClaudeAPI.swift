@@ -23,33 +23,42 @@ public struct ClaudeAPI {
     public func extractActionItems(
         from markdown: String,
         noteTitle: String,
-        userName: String
+        userName: String,
+        attendees: [String] = []
     ) async throws -> [String] {
         guard !apiKey.isEmpty else { throw ClaudeAPIError.noAPIKey }
 
+        let attendeeContext = attendees.isEmpty
+            ? ""
+            : "Other attendees: \(attendees.joined(separator: ", "))\n"
+
+        let othersClause = attendees.isEmpty
+            ? "anyone else"
+            : attendees.joined(separator: ", ")
+
         let prompt = """
-You are extracting personal action items from a meeting transcript summary.
+Extract action items that \(userName) personally needs to act on from these meeting notes.
 
 Meeting: \(noteTitle)
-Person to extract for: \(userName)
-
+\(attendeeContext)
 Meeting notes:
 \(markdown)
 
-Extract ONLY the tasks that "\(userName)" personally needs to act on. Include:
-- Direct to-dos (things to build, write, complete, or deliver)
-- Follow-ups (emails to send, people to contact, meetings to schedule, replies needed)
+Include ONLY items where \(userName) is the one who must act:
+1. Things \(userName) said they would do, committed to, or volunteered for
+2. Things other attendees explicitly asked or requested \(userName) to do
+3. Follow-ups \(userName) needs to send (emails, intros, replies, scheduling)
 
-Rules:
-- Skip tasks assigned to other people
-- Be concise — one clear action per item, no filler words
-- Use imperative phrasing: "Send proposal to Sarah", not "Alex will send..."
-- Include deadlines if mentioned (e.g. "Send report to Jake by Friday")
+Exclude:
+- Tasks for \(othersClause) — even if \(userName) is mentioned in passing
+- General discussion points with no clear owner
+- Vague items like "look into it" with no concrete action
 
-Return a JSON array of strings. If no items found for \(userName), return [].
-Return only valid JSON. No explanation or markdown.
+Use imperative phrasing ("Send the proposal to James") not third-person ("Dimitri will send...").
+Include deadline if mentioned. Be concise — no filler words.
 
-Example: ["Send updated roadmap to Jordan", "Schedule 30-min sync with Mike", "Follow up with Rachel on the contract"]
+Return a JSON array of strings. If \(userName) has no action items, return [].
+Return only valid JSON, no explanation.
 """
 
         let body: [String: Any] = [

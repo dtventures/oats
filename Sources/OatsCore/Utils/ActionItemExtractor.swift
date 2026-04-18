@@ -30,10 +30,11 @@ public enum ActionItemExtractor {
         if !structured.isEmpty { return structured }
 
         if claude.isAvailable {
-            let userName  = currentUser.firstName
-            let noteTitle = note.title ?? "Untitled Meeting"
+            let userName      = currentUser.firstName
+            let noteTitle     = note.title ?? "Untitled Meeting"
+            let attendeeNames = others.map(\.name).filter { !$0.isEmpty }
             if let aiItems = try? await claude.extractActionItems(
-                from: markdown, noteTitle: noteTitle, userName: userName
+                from: markdown, noteTitle: noteTitle, userName: userName, attendees: attendeeNames
             ), !aiItems.isEmpty {
                 return aiItems.map { makeItem(text: $0, note: note, others: others, source: .ai) }
             }

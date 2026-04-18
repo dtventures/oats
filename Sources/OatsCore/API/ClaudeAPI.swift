@@ -54,7 +54,7 @@ Exclude:
 - General discussion points with no clear owner
 - Vague items like "look into it" with no concrete action
 
-Use imperative phrasing ("Send the proposal to James") not third-person ("Dimitri will send...").
+Use imperative phrasing ("Send the proposal to Alex") not third-person ("\(userName) will send...").
 Include deadline if mentioned. Be concise — no filler words.
 
 Return a JSON array of strings. If \(userName) has no action items, return [].

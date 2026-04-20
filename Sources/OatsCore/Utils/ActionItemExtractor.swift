@@ -2,13 +2,12 @@ import Foundation
 
 public enum ActionItemExtractor {
     private static var currentUser: Attendee {
-        let d     = UserDefaults(suiteName: "oats.prefs")!
-        let name  = d.string(forKey: "userName")  ?? ""
-        let email = d.string(forKey: "userEmail") ?? ""
-        return Attendee(name: name, email: email)
+        let identity = UserProfileStore.current()
+        return Attendee(name: identity.trimmedName, email: identity.normalizedEmail)
     }
 
     private static let claude = ClaudeAPI()
+    public static var isAIAvailable: Bool { claude.isAvailable }
 
     // MARK: - Sync (mock/fallback)
 
@@ -17,6 +16,8 @@ public enum ActionItemExtractor {
         let others = participants(for: note)
         let structured = parseStructured(markdown: markdown, note: note, others: others)
         if !structured.isEmpty { return structured }
+        let genericStructured = parseGenericStructured(markdown: markdown, note: note, others: others)
+        if !genericStructured.isEmpty { return genericStructured }
         return mockAIExtract(markdown: markdown, note: note, others: others)
     }
 
@@ -28,6 +29,9 @@ public enum ActionItemExtractor {
 
         let structured = parseStructured(markdown: markdown, note: note, others: others)
         if !structured.isEmpty { return structured }
+
+        let genericStructured = parseGenericStructured(markdown: markdown, note: note, others: others)
+        if !genericStructured.isEmpty { return genericStructured }
 
         if claude.isAvailable {
             let userName      = currentUser.firstName
@@ -63,6 +67,43 @@ public enum ActionItemExtractor {
                 items.append(makeItem(text: text, note: note, others: others))
             }
         }
+        return items
+    }
+
+    private static func parseGenericStructured(markdown: String, note: GranolaNote, others: [Attendee]) -> [TodoItem] {
+        let interestingHeaders = ["action item", "action items", "next step", "next steps", "follow-up", "follow-ups", "todo", "to-do"]
+        let firstName = currentUser.firstName.lowercased()
+        var inSection = false
+        var items: [TodoItem] = []
+        var seen = Set<String>()
+
+        for rawLine in markdown.components(separatedBy: "\n") {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            let lower = line.lowercased()
+
+            if line.hasPrefix("##") {
+                inSection = interestingHeaders.contains { lower.contains($0) }
+                continue
+            }
+            guard inSection else { continue }
+
+            if let groups = capture(line, pattern: #"^[-*]\s+\*\*([^*]+)\*\*[:\s]+(.+)$"#) {
+                // Attributed bullet — only keep if it belongs to the current user
+                guard groups[0].trimmingCharacters(in: .whitespaces).lowercased() == firstName else { continue }
+                let text = cleanedBulletText(groups[1])
+                guard !text.isEmpty, seen.insert(text.lowercased()).inserted else { continue }
+                items.append(makeItem(text: text, note: note, others: others))
+                continue
+            }
+
+            if let groups = capture(line, pattern: #"^[-*]\s+(.+)$"#) {
+                // Unattributed bullet — include as-is
+                let text = cleanedBulletText(groups[0])
+                guard !text.isEmpty, seen.insert(text.lowercased()).inserted else { continue }
+                items.append(makeItem(text: text, note: note, others: others))
+            }
+        }
+
         return items
     }
 
@@ -145,5 +186,12 @@ public enum ActionItemExtractor {
             guard r.location != NSNotFound else { return nil }
             return ns.substring(with: r)
         }
+    }
+
+    private static func cleanedBulletText(_ text: String) -> String {
+        text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .replacingOccurrences(of: #"[.!?]$"#, with: "", options: .regularExpression)
     }
 }

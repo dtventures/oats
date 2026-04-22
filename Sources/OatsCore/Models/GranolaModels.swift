@@ -22,6 +22,34 @@ public struct NoteSummary: Decodable {
     }
 }
 
+public struct TranscriptUtterance: Decodable {
+    public let text:      String
+    public let speaker:   Speaker
+    public let startTime: Date?
+    public let endTime:   Date?
+
+    /// true = the device microphone picked this up (the local user)
+    public var isUser: Bool { speaker.source == "microphone" }
+
+    public struct Speaker: Decodable {
+        public let source: String   // "microphone" | "speaker"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case text, speaker
+        case startTime = "start_time"
+        case endTime   = "end_time"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        text      = try c.decode(String.self, forKey: .text)
+        speaker   = try c.decode(Speaker.self, forKey: .speaker)
+        startTime = try? c.decode(Date.self, forKey: .startTime)
+        endTime   = try? c.decode(Date.self, forKey: .endTime)
+    }
+}
+
 public struct GranolaNote: Decodable {
     public let id:              String
     public let title:           String?
@@ -32,23 +60,25 @@ public struct GranolaNote: Decodable {
     public let summaryMarkdown: String?
     public let calendarEvent:   CalendarEvent?
     public let shareableLink:   String?
+    public let transcript:      [TranscriptUtterance]?
+
+    /// Transcript formatted with speaker labels for Claude extraction.
+    /// [You] = microphone (the app user), [Other] = remote speaker.
+    public var formattedTranscript: String? {
+        guard let t = transcript, !t.isEmpty else { return nil }
+        return t.map { u in
+            let label = u.isUser ? "[You]" : "[Other]"
+            return "\(label): \(u.text)"
+        }.joined(separator: "\n")
+    }
 
     enum CodingKeys: String, CodingKey {
-        case id, title, owner, attendees
+        case id, title, owner, attendees, transcript
         case createdAt       = "created_at"
         case updatedAt       = "updated_at"
         case summaryMarkdown = "summary_markdown"
         case calendarEvent   = "calendar_event"
-        case shareableLink   = "shareable_link"
-    }
-
-    public init(id: String, title: String?, owner: GranolaUser, attendees: [GranolaUser],
-                createdAt: Date, updatedAt: Date, summaryMarkdown: String?,
-                calendarEvent: CalendarEvent?, shareableLink: String?) {
-        self.id = id; self.title = title; self.owner = owner; self.attendees = attendees
-        self.createdAt = createdAt; self.updatedAt = updatedAt
-        self.summaryMarkdown = summaryMarkdown; self.calendarEvent = calendarEvent
-        self.shareableLink = shareableLink
+        case shareableLink   = "web_url"   // API returns web_url, not shareable_link
     }
 
     public init(from decoder: Decoder) throws {
@@ -62,6 +92,7 @@ public struct GranolaNote: Decodable {
         summaryMarkdown = try c.decodeIfPresent(String.self, forKey: .summaryMarkdown)
         calendarEvent   = try c.decodeIfPresent(CalendarEvent.self, forKey: .calendarEvent)
         shareableLink   = try c.decodeIfPresent(String.self, forKey: .shareableLink)
+        transcript      = try? c.decode([TranscriptUtterance].self, forKey: .transcript)
     }
 }
 

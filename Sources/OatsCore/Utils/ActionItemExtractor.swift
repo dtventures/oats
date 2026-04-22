@@ -24,8 +24,24 @@ public enum ActionItemExtractor {
     // MARK: - Async (uses ClaudeAPI when key is set, regex fallback otherwise)
 
     public static func extractAsync(from note: GranolaNote) async -> [TodoItem] {
-        guard let markdown = note.summaryMarkdown else { return [] }
         let others = participants(for: note)
+
+        // Prefer the raw speaker-attributed transcript for AI extraction (more accurate attribution)
+        // Fall back to summary_markdown for structured regex parsing
+        if claude.isAvailable, let transcript = note.formattedTranscript {
+            let userName      = currentUser.firstName
+            let noteTitle     = note.title ?? "Untitled Meeting"
+            let attendeeNames = others.map(\.name).filter { !$0.isEmpty }
+            if let aiItems = try? await claude.extractActionItems(
+                from: transcript, noteTitle: noteTitle, userName: userName,
+                attendees: attendeeNames, isTranscript: true
+            ), !aiItems.isEmpty {
+                return aiItems.map { makeItem(text: $0, note: note, others: others, source: .ai) }
+            }
+        }
+
+        // Fallback: structured parsing of summary_markdown
+        guard let markdown = note.summaryMarkdown else { return [] }
 
         let structured = parseStructured(markdown: markdown, note: note, others: others)
         if !structured.isEmpty { return structured }
@@ -97,9 +113,12 @@ public enum ActionItemExtractor {
             }
 
             if let groups = capture(line, pattern: #"^[-*]\s+(.+)$"#) {
-                // Unattributed bullet — include as-is
+                // Unattributed bullet — only include if it sounds like a personal action item:
+                // starts with an imperative verb OR contains first-person language.
+                // This filters out third-party plans like "Planning to expand marketing efforts".
                 let text = cleanedBulletText(groups[0])
                 guard !text.isEmpty, seen.insert(text.lowercased()).inserted else { continue }
+                guard looksLikePersonalTask(text) else { continue }
                 items.append(makeItem(text: text, note: note, others: others))
             }
         }
@@ -186,6 +205,32 @@ public enum ActionItemExtractor {
             guard r.location != NSNotFound else { return nil }
             return ns.substring(with: r)
         }
+    }
+
+    /// Returns true if an unattributed bullet sounds like a personal action item for the current user.
+    /// Rejects third-party plans ("Planning to expand…", "Open to strategic options").
+    private static func looksLikePersonalTask(_ text: String) -> Bool {
+        let lower = text.lowercased()
+
+        // First-person language → definitely theirs
+        let firstPerson = ["i ", "i'll", "i've", "i'm", "i need", "i will", "i should",
+                           "my ", "we ", "we'll", "we've", "we're", "our "]
+        if firstPerson.contains(where: { lower.hasPrefix($0) || lower.contains(" \($0.trimmingCharacters(in: .whitespaces)) ") }) {
+            return true
+        }
+
+        // Imperative verbs at the start (the most common action-item format)
+        let imperatives = ["send", "schedule", "follow", "reply", "respond", "review",
+                           "update", "write", "share", "prepare", "reach out", "contact",
+                           "book", "set up", "set ", "create", "draft", "confirm",
+                           "check", "look into", "research", "complete", "finish",
+                           "submit", "upload", "connect", "introduce", "add ", "fix ",
+                           "test", "deploy", "push", "pull", "merge", "close"]
+        if imperatives.contains(where: { lower.hasPrefix($0) }) {
+            return true
+        }
+
+        return false
     }
 
     private static func cleanedBulletText(_ text: String) -> String {

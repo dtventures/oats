@@ -65,7 +65,7 @@ public struct GranolaAPI {
 
     private func fetchNote(id: String) async throws -> GranolaNote {
         let encoded = id.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? id
-        guard let url = URL(string: "\(baseURL)/v1/notes/\(encoded)") else {
+        guard let url = URL(string: "\(baseURL)/v1/notes/\(encoded)?include=transcript") else {
             throw GranolaAPIError.badResponse(0)
         }
         return try await get(url: url)

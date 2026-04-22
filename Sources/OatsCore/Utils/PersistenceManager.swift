@@ -45,6 +45,7 @@ public enum PersistenceManager {
     public enum File {
         public static let todos          = "todos.json"
         public static let processedNotes = "processedNotes.json"
+        public static let noteSyncStates = "noteSyncStates.json"
     }
 
     // MARK: - Note markdown files

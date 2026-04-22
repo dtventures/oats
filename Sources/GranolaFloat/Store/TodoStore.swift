@@ -19,7 +19,7 @@ final class TodoStore: ObservableObject {
     enum AppView { case list, archive, settings }
 
     private let api = GranolaAPI()
-    private var processedNoteIds: Set<String> = []
+    private var noteSyncStates: [String: NoteProcessingFingerprint] = [:]
     private var saveCancellable: AnyCancellable?
 
     // MARK: - Init
@@ -40,14 +40,14 @@ final class TodoStore: ObservableObject {
         if let saved = PersistenceManager.load([TodoItem].self, from: PersistenceManager.File.todos) {
             todos = saved
         }
-        if let ids = PersistenceManager.load([String].self, from: PersistenceManager.File.processedNotes) {
-            processedNoteIds = Set(ids)
+        if let savedStates = PersistenceManager.load([String: NoteProcessingFingerprint].self, from: PersistenceManager.File.noteSyncStates) {
+            noteSyncStates = savedStates
         }
     }
 
     private func saveToDisk(_ items: [TodoItem]) {
         PersistenceManager.save(items, to: PersistenceManager.File.todos)
-        PersistenceManager.save(Array(processedNoteIds), to: PersistenceManager.File.processedNotes)
+        PersistenceManager.save(noteSyncStates, to: PersistenceManager.File.noteSyncStates)
     }
 
     // MARK: - Sync
@@ -57,64 +57,85 @@ final class TodoStore: ObservableObject {
     }
 
     func syncPeriod(days: Int) async {
-        // Clear processedNoteIds so all notes in the window are re-evaluated
-        await MainActor.run { processedNoteIds = [] }
-        await sync(daysBack: days)
+        await MainActor.run { noteSyncStates = [:] }
+        await sync(daysBack: days, notify: false)
     }
 
     func sync() async {
         await sync(daysBack: 14)
     }
 
-    private func sync(daysBack: Int) async {
+    private func sync(daysBack: Int, notify: Bool = true) async {
         await MainActor.run {
             isSyncing  = true
             syncError  = nil
         }
 
+        let identity = UserProfileStore.current()
+        guard identity.isComplete else {
+            await MainActor.run {
+                isSyncing = false
+                syncError = UserProfileStore.missingIdentityMessage
+            }
+            return
+        }
+
         do {
             let notes = try await api.fetchRecentNotes(daysBack: daysBack)
-            // Only skip notes that have already been processed with content.
-            // Notes with no summaryMarkdown yet are retried every sync cycle
-            // until Granola finishes generating them.
-            let unprocessed = notes.filter { !processedNoteIds.contains($0.id) }
-            let notesWithContent    = unprocessed.filter { $0.summaryMarkdown != nil && !($0.summaryMarkdown!.isEmpty) }
-            let notesWithoutContent = unprocessed.filter { $0.summaryMarkdown == nil || $0.summaryMarkdown!.isEmpty }
-
-            // Mark notes-with-content as processed now (won't re-extract next sync)
-            for note in notesWithContent { processedNoteIds.insert(note.id) }
-            // Notes without content are intentionally left out of processedNoteIds
-            // so they are retried on the next 30-second sync
-            _ = notesWithoutContent
+            let notesWithContent = notes.filter {
+                guard let markdown = $0.summaryMarkdown else { return false }
+                return !markdown.isEmpty
+            }
+            let notesToRefresh = notesWithContent.filter { note in
+                let fingerprint = NoteProcessingFingerprint(
+                    note: note,
+                    identity: identity,
+                    claudeEnabled: ActionItemExtractor.isAIAvailable
+                )
+                return noteSyncStates[note.id] != fingerprint
+            }
 
             // Persist each note's markdown before extracting items
-            for note in notesWithContent {
+            for note in notesToRefresh {
                 PersistenceManager.saveNote(note.summaryMarkdown!, noteId: note.id)
             }
 
-            let newItems = await withTaskGroup(of: [TodoItem].self) { group in
-                for note in notesWithContent {
-                    group.addTask { await ActionItemExtractor.extractAsync(from: note) }
+            let refreshedItems = await withTaskGroup(of: (String, [TodoItem]).self) { group in
+                for note in notesToRefresh {
+                    group.addTask { (note.id, await ActionItemExtractor.extractAsync(from: note)) }
                 }
-                var all: [TodoItem] = []
-                for await items in group { all.append(contentsOf: items) }
+                var all: [(String, [TodoItem])] = []
+                for await result in group { all.append(result) }
                 return all
             }
 
+            let refreshedNoteIds = Set(notesToRefresh.map(\.id))
+            let previouslySeenNoteIds = Set(refreshedNoteIds.filter { noteSyncStates[$0] != nil })
+            let notificationItems = refreshedItems
+                .filter { !previouslySeenNoteIds.contains($0.0) }
+                .flatMap(\.1)
+            let allItems = refreshedItems.flatMap(\.1)
+
             await MainActor.run {
-                if !newItems.isEmpty {
-                    let existingNoteIds = Set(todos.map(\.noteId))
-                    let deduped = newItems.filter { !existingNoteIds.contains($0.noteId) }
-                    if !deduped.isEmpty { todos.append(contentsOf: deduped) }
+                if !refreshedNoteIds.isEmpty {
+                    todos.removeAll { refreshedNoteIds.contains($0.noteId) }
+                    todos.append(contentsOf: allItems)
+                    for note in notesToRefresh {
+                        noteSyncStates[note.id] = NoteProcessingFingerprint(
+                            note: note,
+                            identity: identity,
+                            claudeEnabled: ActionItemExtractor.isAIAvailable
+                        )
+                    }
                 }
                 lastSynced = Date()
                 isSyncing  = false
-                PersistenceManager.save(Array(processedNoteIds),
-                                        to: PersistenceManager.File.processedNotes)
+                PersistenceManager.save(noteSyncStates,
+                                        to: PersistenceManager.File.noteSyncStates)
                 updateBadge()
             }
-            if !newItems.isEmpty {
-                sendNotification(for: newItems)
+            if notify && !notificationItems.isEmpty {
+                sendNotification(for: notificationItems)
             }
         } catch {
             await MainActor.run {
@@ -128,10 +149,11 @@ final class TodoStore: ObservableObject {
 
     func resetAndSync() async {
         await MainActor.run {
-            todos            = []
-            processedNoteIds = []
-            PersistenceManager.save([TodoItem](),  to: PersistenceManager.File.todos)
-            PersistenceManager.save([String](),    to: PersistenceManager.File.processedNotes)
+            todos          = []
+            noteSyncStates = [:]
+            PersistenceManager.save([TodoItem](), to: PersistenceManager.File.todos)
+            PersistenceManager.save([String: NoteProcessingFingerprint](),
+                                    to: PersistenceManager.File.noteSyncStates)
         }
         await sync()
     }

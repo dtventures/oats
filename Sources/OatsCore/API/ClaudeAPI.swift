@@ -21,10 +21,11 @@ public struct ClaudeAPI {
     // MARK: - Extract action items for a specific person
 
     public func extractActionItems(
-        from markdown: String,
+        from content: String,
         noteTitle: String,
         userName: String,
-        attendees: [String] = []
+        attendees: [String] = [],
+        isTranscript: Bool = false
     ) async throws -> [String] {
         guard !apiKey.isEmpty else { throw ClaudeAPIError.noAPIKey }
 
@@ -36,17 +37,23 @@ public struct ClaudeAPI {
             ? "anyone else"
             : attendees.joined(separator: ", ")
 
+        let contentLabel = isTranscript ? "Meeting transcript" : "Meeting notes"
+        let speakerNote = isTranscript ? """
+
+Speaker key: [You] = \(userName), [Other] = the other participant(s).
+""" : ""
+
         let prompt = """
-Extract action items that \(userName) personally needs to act on from these meeting notes.
+Extract action items that \(userName) personally needs to act on from this meeting.
 
 Meeting: \(noteTitle)
-\(attendeeContext)
-Meeting notes:
-\(markdown)
+\(attendeeContext)\(speakerNote)
+\(contentLabel):
+\(content)
 
 Include ONLY items where \(userName) is the one who must act:
-1. Things \(userName) said they would do, committed to, or volunteered for
-2. Things other attendees explicitly asked or requested \(userName) to do
+1. Things \(userName) said they would do, committed to, or volunteered for ([You] lines in the transcript)
+2. Things other participants explicitly asked or requested \(userName) to do ([Other] lines directed at \(userName))
 3. Follow-ups \(userName) needs to send (emails, intros, replies, scheduling)
 
 Exclude:
@@ -61,7 +68,7 @@ Return a JSON array of strings. If \(userName) has no action items, return [].
 Return only valid JSON, no explanation.
 """
 
-        let body: [String: Any] = [
+        let requestBody: [String: Any] = [
             "model":      model,
             "max_tokens": 1024,
             "messages":   [["role": "user", "content": prompt]],
@@ -73,7 +80,7 @@ Return only valid JSON, no explanation.
         request.setValue(apiKey,             forHTTPHeaderField: "x-api-key")
         request.setValue("2023-06-01",       forHTTPHeaderField: "anthropic-version")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -81,9 +88,9 @@ Return only valid JSON, no explanation.
             throw ClaudeAPIError.badResponse(http.statusCode)
         }
 
-        guard let json    = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let content = (json["content"] as? [[String: Any]])?.first,
-              let text    = content["text"] as? String
+        guard let json        = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let firstBlock = (json["content"] as? [[String: Any]])?.first,
+              let text       = firstBlock["text"] as? String
         else { throw ClaudeAPIError.noContent }
 
         let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)

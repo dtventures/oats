@@ -21,7 +21,14 @@ struct TodoRowView: View {
         return .clear
     }
 
+    // Pre-compute note existence once per render so badge slots are stable
+    private var noteExists: Bool { PersistenceManager.noteExists(noteId: item.noteId) }
+
     var body: some View {
+        let notesOpen = store.showingNoteId == item.noteId
+        let showAI    = item.source == .ai
+        let badgeVisible = rowHovered && checkState == .idle
+
         VStack(spacing: 0) {
             HStack(spacing: 10) {
 
@@ -42,7 +49,6 @@ struct TodoRowView: View {
                     .strikethrough(checkState != .idle, color: .textSecondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    .padding(.trailing, 10)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .animation(.easeInOut(duration: 0.2), value: checkState)
                     .onTapGesture { showDetail = true }
@@ -50,20 +56,21 @@ struct TodoRowView: View {
                         TodoDetailView(item: item, onOpenGranola: openInGranola)
                     }
 
-                // ── AI badge (hover only) ─────────────────────────────
-                if item.source == .ai && rowHovered {
+                // ── AI badge — always in layout, fades in/out ─────────
+                // Rendered as a fixed-width slot to prevent text reflow on hover.
+                if showAI {
                     Text("AI")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.granolaGreen)
                         .padding(6)
                         .background(Color.granolaLight,
                                     in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .transition(.opacity)
+                        .opacity(badgeVisible ? 1 : 0)
+                        .allowsHitTesting(badgeVisible)
                 }
 
-                // ── Notes badge (hover only, when .md exists) ─────────
-                if rowHovered && checkState == .idle && PersistenceManager.noteExists(noteId: item.noteId) {
-                    let notesOpen = store.showingNoteId == item.noteId
+                // ── Notes badge — always in layout when note exists ───
+                if noteExists {
                     Button {
                         withAnimation(.easeInOut(duration: 0.18)) {
                             store.showingNoteId = notesOpen ? nil : item.noteId
@@ -78,7 +85,8 @@ struct TodoRowView: View {
                     }
                     .buttonStyle(.plain)
                     .help(notesOpen ? "Close meeting notes" : "View meeting notes")
-                    .transition(.opacity)
+                    .opacity(badgeVisible ? 1 : 0)
+                    .allowsHitTesting(badgeVisible)
                 }
             }
             .padding(.horizontal, 14)
@@ -106,11 +114,13 @@ struct TodoRowView: View {
         .background(rowBackground)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .padding(.horizontal, 6)
-        .onHover { rowHovered = $0 }
+        .onHover { hovered in
+            withAnimation(.easeOut(duration: 0.12)) { rowHovered = hovered }
+        }
         .opacity(checkState == .done ? 0 : 1)
         .offset(x: checkState == .done ? 14 : 0)
-        .animation(.easeInOut(duration: 0.3), value: checkState == .done)
-        .animation(.easeInOut(duration: 0.15), value: isSelected)
+        .animation(.spring(response: 0.28, dampingFraction: 1.0), value: checkState == .done)
+        .animation(.easeOut(duration: 0.15), value: isSelected)
     }
 
     private func triggerComplete() {

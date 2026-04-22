@@ -12,6 +12,7 @@ struct OnboardingView: View {
     @State private var userEmail:       String  = ""
     @State private var isValidating:    Bool    = false
     @State private var validationError: String? = nil
+    @State private var profileError:    String? = nil
     @State private var showGranolaKey:  Bool    = true
     @State private var showClaudeKey:   Bool    = true
 
@@ -64,6 +65,7 @@ struct OnboardingView: View {
                         ProfileStepView(
                             name: $userName,
                             email: $userEmail,
+                            error: $profileError,
                             onDone: finish,
                             onBack: { advance(to: .claudeKey) }
                         )
@@ -117,14 +119,18 @@ struct OnboardingView: View {
         let trimmedName   = userName.trimmingCharacters(in: .whitespaces)
         let trimmedEmail  = userEmail.trimmingCharacters(in: .whitespaces)
 
+        guard !trimmedName.isEmpty, !trimmedEmail.isEmpty else {
+            profileError = UserProfileStore.missingIdentityMessage
+            return
+        }
+
         if !trimmedClaude.isEmpty {
             KeychainManager.save(trimmedClaude, for: KeychainManager.Key.claudeAPIKey)
         }
-        let defaults = UserDefaults(suiteName: "oats.prefs")!
+        let defaults = UserDefaults(suiteName: UserProfileStore.suiteName)!
         if !trimmedName.isEmpty  { defaults.set(trimmedName,  forKey: "userName") }
         if !trimmedEmail.isEmpty { defaults.set(trimmedEmail, forKey: "userEmail") }
         defaults.set(true, forKey: "hasCompletedOnboarding")
-        defaults.synchronize()
         onComplete()
     }
 }
@@ -304,6 +310,7 @@ private struct ClaudeKeyStepView: View {
 private struct ProfileStepView: View {
     @Binding var name:  String
     @Binding var email: String
+    @Binding var error: String?
     var onDone: () -> Void
     var onBack: () -> Void
     @FocusState private var focused: Bool
@@ -323,11 +330,20 @@ private struct ProfileStepView: View {
 
             OnboardingField(placeholder: "First name", text: $name)
                 .focused($focused)
+                .onChange(of: name) { error = nil }
                 .onAppear { focused = true }
                 .padding(.bottom, 10)
 
             OnboardingField(placeholder: "Work email", text: $email)
-                .padding(.bottom, 28)
+                .onChange(of: email) { error = nil }
+                .padding(.bottom, error == nil ? 28 : 12)
+
+            if let error {
+                Text(error)
+                    .font(.system(size: 11))
+                    .foregroundColor(.red.opacity(0.8))
+                    .padding(.bottom, 16)
+            }
 
             HStack(spacing: 10) {
                 OnboardingButton("Back", style: .ghost, action: onBack)

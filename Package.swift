@@ -29,5 +29,10 @@ let package = Package(
             ],
             path: "Sources/OatsCLI"
         ),
+        .testTarget(
+            name: "OatsCoreTests",
+            dependencies: ["OatsCore"],
+            path: "Tests/OatsCoreTests"
+        ),
     ]
 )

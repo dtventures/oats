@@ -186,6 +186,20 @@ struct AppSettingsView: View {
                 .background(Color.granolaLight, in: RoundedRectangle(cornerRadius: 8))
             }
 
+            if !UserProfileStore.current().isComplete {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color.orange.opacity(0.85))
+                        .frame(width: 6, height: 6)
+                    Text(UserProfileStore.missingIdentityMessage)
+                        .font(.system(size: 10))
+                        .foregroundColor(.textPrimary)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+            }
+
             // Sync history
             SettingsRow(label: "Sync History") {
                 HStack(spacing: 8) {

@@ -61,6 +61,10 @@ codesign --force --deep --sign "${SIGN_IDENTITY}" "${APP_BUNDLE}"
 echo "→ Verifying signature…"
 codesign --verify --deep --strict "${APP_BUNDLE}" && echo "   Signature OK"
 
+# ── 4. Strip quarantine so downloaders aren't blocked by Gatekeeper ───────
+echo "→ Stripping quarantine attribute…"
+xattr -cr "${APP_BUNDLE}"
+
 # ── 5. Package DMG ────────────────────────────────────────────────────────
 echo "→ Creating ${APP_NAME}.dmg…"
 rm -rf "${STAGING_DIR}"

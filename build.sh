@@ -46,7 +46,8 @@ cp "${BUILD_DIR}/${APP_NAME}" "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
 # Info.plist goes at Contents/ (not Resources/)
 cp "Resources/Info.plist" "${APP_BUNDLE}/Contents/Info.plist"
 
-# SPM resource bundle (contains OatIcon.png etc.)
+# SPM resource bundle — lives in Contents/Resources/ per proper app bundle structure.
+# We use Bundle.appResources (not Bundle.module) in source to find it here correctly.
 cp -R "${BUILD_DIR}/${APP_NAME}_${APP_NAME}.bundle" \
       "${APP_BUNDLE}/Contents/Resources/"
 

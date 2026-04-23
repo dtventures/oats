@@ -30,7 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupMainMenu()
 
         // Set Dock + App Switcher icon from bundled asset
-        if let url = Bundle.module.url(forResource: "OatIcon", withExtension: "png"),
+        if let url = Bundle.appResources.url(forResource: "OatIcon", withExtension: "png"),
            let icon = NSImage(contentsOf: url) {
             NSApp.applicationIconImage = icon
         }

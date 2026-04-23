@@ -368,7 +368,7 @@ private struct OatIconView: View {
 
     var body: some View {
         Group {
-            if let url = Bundle.module.url(forResource: "OatIcon", withExtension: "png"),
+            if let url = Bundle.appResources.url(forResource: "OatIcon", withExtension: "png"),
                let nsImage = NSImage(contentsOf: url) {
                 Image(nsImage: nsImage)
                     .resizable()

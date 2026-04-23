@@ -16,7 +16,7 @@ struct PaywallView: View {
 
             // Icon
             Group {
-                if let url = Bundle.module.url(forResource: "OatIcon", withExtension: "png"),
+                if let url = Bundle.appResources.url(forResource: "OatIcon", withExtension: "png"),
                    let img = NSImage(contentsOf: url) {
                     Image(nsImage: img)
                         .resizable()
